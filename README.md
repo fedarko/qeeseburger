@@ -16,6 +16,12 @@ This is based on three gists I've written before:
 2. [`convert_timestamp_to_ordinal_date.py`](https://gist.github.com/fedarko/05222da5b3f01ce9d77c6b989cf4d881)
 3. [`convert_timestamp_to_days_elapsed.py`](https://gist.github.com/fedarko/647241b3f06ca76c1ccb6bcbd7fc778d)
 
+### Dependencies
+
+- [Click](http://click.palletsprojects.com/)
+- [dateutil](https://dateutil.readthedocs.io/en/stable/)
+- [QIIME 2 (this uses the "Artifact API")](https://qiime2.org/)
+
 ## Why did you name this tool "Qeeseburger"?
 Honestly, I really just wanted to name something "Qeeseburger." In that
 respect, this code is already a success.
