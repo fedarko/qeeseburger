@@ -55,7 +55,7 @@ def add_columns(
     m = Metadata.load(input_metadata_file)
     m_df = m.to_dataframe()
 
-    required_cols = {"host_age_years", "collection_timestamp"}
+    required_cols = {"host_subject_id", "collection_timestamp"}
     if len(required_cols & set(m_df.columns)) < len(required_cols):
         raise ValueError(
             "Input metadata file must include the following "
