@@ -27,14 +27,17 @@ from qiime2 import Metadata
     "-i",
     "--input-metadata-file",
     required=True,
-    help="Input metadata filepath.",
+    help=(
+        "Input metadata filepath. Must contain collection_timestamp and "
+        "host_subject_id columns."
+    ),
     type=str,
 )
 @click.option(
     "-o",
     "--output-metadata-file",
     required=True,
-    help="Output metadata filepath.",
+    help="Output metadata filepath. Will contain some additional columns.",
     type=str,
 )
 def add_columns(
@@ -44,10 +47,6 @@ def add_columns(
 
     In particular, the columns added are "host_age_years", "ordinal_timestamp",
     and "days_since_first_day".
-    
-    NOTE that this requires that your metadata contains "collection_timestamp"
-    and "host_subject_id" columns. If it does not, this will result in some
-    sort of error.
     """
 
     host_birthday_datetime = parse(host_birthday)
@@ -62,9 +61,11 @@ def add_columns(
             "columns: {}".format(required_cols)
         )
 
-    if "host_age_years" in m_df.columns:
+    output_cols = {"host_age_years", "ordinal_timestamp", "days_since_first_day"}
+    if len(output_cols & set(m_df.columns)) > 0:
         raise ValueError(
-            "A host_age_years column already exists in the input metadata!"
+            "Input metadata file already includes at least one of the "
+            "following columns: {}".format(output_cols)
         )
 
     m_df["host_age_years"] = 0

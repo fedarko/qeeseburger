@@ -18,7 +18,7 @@ from qiime2 import Metadata
     "--phase-name",
     required=True,
     help="Key word to look for in dietary phases. Any rows in the key dates "
-    " spreadsheet where the 'Event' column contains the text 'Started "
+    "spreadsheet where the 'Event' column contains the text 'Started "
     "PHASENAME' or 'Stopped PHASENAME', where PHASENAME is the string you "
     "specify here, will be treated as start/end range(s) for that phase.",
     type=str,
@@ -27,21 +27,30 @@ from qiime2 import Metadata
     "-k",
     "--key-dates-spreadsheet",
     required=True,
-    help="Filepath to an Excel spreadsheet containing key dates.",
+    help=(
+        "Filepath to an Excel spreadsheet containing dates as the first "
+        "column and 'Event' as the second column."
+    ),
     type=str,
 )
 @click.option(
     "-i",
     "--input-metadata-file",
     required=True,
-    help="Input metadata filepath.",
+    help=(
+        "Input metadata filepath. Must contain collection_timestamp and "
+        "host_subject_id columns."
+    ),
     type=str,
 )
 @click.option(
     "-o",
     "--output-metadata-file",
     required=True,
-    help="Output metadata filepath.",
+    help=(
+        "Output metadata filepath. Will contain a new column named with "
+        "whatever you set the -p option to."
+    ),
     type=str,
 )
 def add_dietary_phase(
@@ -77,13 +86,6 @@ def add_dietary_phase(
 
         Samples where host_subject_id is NOT EQUAL to the -hsid parameter
         will be labelled "not applicable".
-
-    NOTE that this requires that your metadata contains "collection_timestamp"
-    and "host_subject_id" columns. If it does not, this will result in some
-    sort of error.
-    
-    Similarly, your key dates spreadsheet should contain an "Event" column,
-    and its indices (the first column in the spreadsheet) should be dates.
 
     ALSO this assumes that your key dates are only specific down to the day. If
     you have multiple stopping/starting dates on the same day, I don't think
