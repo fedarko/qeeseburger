@@ -67,7 +67,7 @@ def add_dietary_phase(
     spreadsheet where the "Event" column contains the text "Started PHASENAME"
     or "Stopped PHASENAME", where PHASENAME is just the string you specified in
     the -p option.
-    
+
     This program will then use the dates associated with these rows to
     determine ranges of dates for which the given dietary phase was being
     followed -- this is useful if the subject went on and off a diet multiple
@@ -135,6 +135,11 @@ def add_dietary_phase(
             "phase continues to the final sample, then you'll need to add a "
             "stoppping row for the day of or after that sample)"
         )
+    print(
+        'Found {} ranges for the "{}" dietary phase.'.format(
+            len(starting_dates.index), phase_name
+        )
+    )
 
     # We now know that we have an equal (and >= 1) number of starting and
     # stopping dates, but we'd like to know if the dates actually make sense.
