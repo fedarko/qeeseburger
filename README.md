@@ -47,6 +47,7 @@ issue, PR, etc.
 
 ## Acknowledgements
 
+- [I created the logo for this by butchering the QIIME 2 logo, sorry](https://qiime2.org/)
 - [This guide that I always come back to for centering things in GitHub markdown](https://gist.github.com/DavidWells/7d2e0e1bc78f4ac59a123ddf8b74932d)
 
 ## Why did you name this tool "Qeeseburger"?
