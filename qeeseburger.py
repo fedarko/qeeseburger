@@ -62,6 +62,11 @@ def add_columns(
             "columns: {}".format(required_cols)
         )
 
+    if "host_age_years" in m_df.columns:
+        raise ValueError(
+            "A host_age_years column already exists in the input metadata!"
+        )
+
     m_df["host_age_years"] = 0
 
     for sample_id in m_df.index:
