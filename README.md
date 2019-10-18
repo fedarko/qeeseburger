@@ -1,5 +1,9 @@
 # Qeeseburger
 
+<div align="center">
+<img width="60%" src="https://raw.githubusercontent.com/fedarko/qeeseburger/master/docs/images/logo.png" alt="Qeeseburger logo" />
+</div>
+
 This repository contains some basic scripts/etc. that I've written for dealing
 with time series microbiome/biomarker data. This might be turned into an
 actual python package and/or QIIME 2 plugin sometime in the future, depending
@@ -40,6 +44,10 @@ issue, PR, etc.
 - [dateutil](https://dateutil.readthedocs.io/en/stable/)
 - [pandas](https://pandas.pydata.org/)
 - [QIIME 2 (this uses the "Artifact API")](https://qiime2.org/)
+
+## Acknowledgements
+
+- [This guide that I always come back to for centering things in GitHub markdown](https://gist.github.com/DavidWells/7d2e0e1bc78f4ac59a123ddf8b74932d)
 
 ## Why did you name this tool "Qeeseburger"?
 Honestly, I really just wanted to name something "Qeeseburger." In that
