@@ -1,7 +1,7 @@
 # Qeeseburger
 
 <div align="center">
-<img width="60%" src="https://raw.githubusercontent.com/fedarko/qeeseburger/master/docs/images/logo.png" alt="Qeeseburger logo" />
+<img width="60%" src="https://raw.githubusercontent.com/fedarko/qeeseburger/master/images/logo.png" alt="Qeeseburger logo" />
 </div>
 
 This repository contains some basic scripts/etc. that I've written for dealing
