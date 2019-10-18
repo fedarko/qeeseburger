@@ -87,10 +87,10 @@ def add_dietary_phase(
         Samples where host_subject_id is NOT EQUAL to the -hsid parameter
         will be labelled "not applicable".
 
-    ALSO this assumes that your key dates are only specific down to the day. If
-    you have multiple stopping/starting dates on the same day, I don't think
-    this will result in an error being thrown but it will likely mess things up
-    if all you care about is resolution to the day.
+    This only treats dates as down to the day. So if the subject started a diet
+    at 12pm on a day and then ended that diet at 5pm that same day, this code
+    will treat both of these dates as occurring on the same day and thus raise
+    an error.
     """
 
     m = Metadata.load(input_metadata_file)
@@ -100,12 +100,12 @@ def add_dietary_phase(
     required_cols = {"host_subject_id", "collection_timestamp"}
     if len(required_cols & set(m_df.columns)) < len(required_cols):
         raise ValueError(
-            "Input metadata file must include the following "
-            "columns: {}".format(required_cols)
+            "Input metadata file must include the following columns: "
+            "{}".format(required_cols)
         )
     if phase_name in m_df.columns:
         raise ValueError(
-            "A {} column already exists in the input " "metadata!".format(phase_name)
+            "A {} column already exists in the input metadata!".format(phase_name)
         )
 
     # Validate the key dates spreadsheet, somewhat
@@ -159,14 +159,14 @@ def add_dietary_phase(
         db = stopping_dates.iloc[i].name.date()
         if da >= db:
             raise ValueError(
-                "Starting date {} occurs later or at same time as "
+                "Starting date {} occurs later or on same day as "
                 "corresponding stopping date {}.".format(da, db)
             )
         if i > 0:
             prev_db = stopping_dates.iloc[i - 1].name.date()
             if da <= prev_db:
                 raise ValueError(
-                    "Starting date {} occurs earlier or at same time as "
+                    "Starting date {} occurs earlier or on same day as "
                     "previous stopping date {}.".format(da, prev_db)
                 )
 
