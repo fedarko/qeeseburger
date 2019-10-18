@@ -152,15 +152,18 @@ def add_dietary_phase(
     # these ranges are not overlapping, so they can just be represented as a
     # single line -- this is what we're checking for here.
     for i in range(len(starting_dates.index)):
-        da = starting_dates.iloc[i].name
-        db = stopping_dates.iloc[i].name
+        # NOTE: we use .date() to just get the date, not the timestamp, of
+        # datetimes. This lets us do comparisons only down to the day level.
+        # Thanks to https://stackoverflow.com/a/13227661/10730311.
+        da = starting_dates.iloc[i].name.date()
+        db = stopping_dates.iloc[i].name.date()
         if da >= db:
             raise ValueError(
                 "Starting date {} occurs later or at same time as "
                 "corresponding stopping date {}.".format(da, db)
             )
         if i > 0:
-            prev_db = stopping_dates.iloc[i - 1].name
+            prev_db = stopping_dates.iloc[i - 1].name.date()
             if da <= prev_db:
                 raise ValueError(
                     "Starting date {} occurs earlier or at same time as "
@@ -175,7 +178,7 @@ def add_dietary_phase(
     for sample_id in m_df.index:
         if m_df.loc[sample_id, "host_subject_id"] == host_subject_id:
             # Parse sample timestamp
-            sample_datetime = parse(m_df["collection_timestamp"][sample_id])
+            sample_date = parse(m_df["collection_timestamp"][sample_id]).date()
 
             # If the sample was collected before any of the ranges, then we'll
             # never get into the first "if" statement in the for loop below.
@@ -185,8 +188,8 @@ def add_dietary_phase(
 
             # Iterate backwards through ranges
             for ii in range(len(starting_dates.index))[::-1]:
-                if sample_datetime >= starting_dates.iloc[ii].name:
-                    if sample_datetime <= stopping_dates.iloc[ii].name:
+                if sample_date >= starting_dates.iloc[ii].name.date():
+                    if sample_date <= stopping_dates.iloc[ii].name.date():
                         in_phase = "TRUE"
                         break
                     else:
