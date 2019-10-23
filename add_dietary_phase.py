@@ -20,7 +20,9 @@ from qiime2 import Metadata
     help="Key word to look for in dietary phases. Any rows in the key dates "
     "spreadsheet where the 'Event' column contains the text 'Started "
     "PHASENAME' or 'Stopped PHASENAME', where PHASENAME is the string you "
-    "specify here, will be treated as start/end range(s) for that phase.",
+    "specify here, will be treated as start/end range(s) for that phase "
+    "(these ranges are assumed to be inclusive for the start date and "
+    "exclusive on the end date).",
     type=str,
 )
 @click.option(
@@ -71,7 +73,8 @@ def add_dietary_phase(
     This program will then use the dates associated with these rows to
     determine ranges of dates for which the given dietary phase was being
     followed -- this is useful if the subject went on and off a diet multiple
-    times.
+    times. The start date of a phase is counted as being in that range; the end
+    date is NOT counted as being in that range.
 
     Finally, this will add a PHASENAME column to the metadata file. Samples
     will be assigned one of three possible values in this column:
@@ -194,7 +197,7 @@ def add_dietary_phase(
             # Iterate backwards through ranges
             for ii in range(len(starting_dates.index))[::-1]:
                 if sample_date >= starting_dates.iloc[ii].name.date():
-                    if sample_date <= stopping_dates.iloc[ii].name.date():
+                    if sample_date < stopping_dates.iloc[ii].name.date():
                         in_phase = "TRUE"
                         break
                     else:
