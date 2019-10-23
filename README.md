@@ -29,7 +29,7 @@ is particularly useful if the same diet was started and stopped multiple times.
 
 Note that this makes a few assumptions, in particular:
 1. **That the dates in the spreadsheet are only precise down to the day.**
-2. **That "Stopped Diet A" dates still count as days where that diet was followed.**
+2. **That "Stopped Diet A" dates do not count as days where that diet was followed:** that is, this treats the end-dates of dietary ranges in an "exclusive" manner.
 
 ## Disclaimer
 
