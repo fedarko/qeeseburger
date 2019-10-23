@@ -192,13 +192,13 @@ def add_dietary_phase(
             # never get into the first "if" statement in the for loop below.
             # That's fine; in this case, the sample doesn't fall in any of the
             # ranges, so we can safely leave its value as FALSE.
-            in_phase = "FALSE"
+            phase_value = "FALSE"
 
             # Iterate backwards through ranges
             for ii in range(len(starting_dates.index))[::-1]:
                 if sample_date >= starting_dates.iloc[ii].name.date():
                     if sample_date < stopping_dates.iloc[ii].name.date():
-                        in_phase = "TRUE"
+                        phase_value = "TRUE"
                         break
                     else:
                         # We know that this sample occurred after the current
@@ -207,9 +207,19 @@ def add_dietary_phase(
                         # in any ranges after this one. Therefore, we can
                         # conclusively say that this sample is not present in
                         # any ranges.
+                        #
+                        # ...However, the fact that this sample was collected
+                        # *after* the diet was started for the first time could
+                        # be interesting, esp. if the effects of the diet were
+                        # residual. So we assign a special value for these
+                        # samples; depending on how you want to interpret this
+                        # data, this can be handled in a few different ways.
+                        # (For stuff like plotting sample ordinations, making
+                        # this distinction clear is useful.)
+                        phase_value = "FALSE BUT TAKEN AFTER DIET START"
                         break
 
-            m_df.loc[sample_id, phase_name] = in_phase
+            m_df.loc[sample_id, phase_name] = phase_value
 
         # For samples where the host subject ID *does not* match the one
         # specified, the phase_name value will be left as "not applicable"
