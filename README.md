@@ -4,8 +4,8 @@
 <img width="60%" src="https://raw.githubusercontent.com/fedarko/qeeseburger/master/images/logo.png" alt="Qeeseburger logo" />
 </div>
 
-This repository contains some basic scripts/etc. that I've written for dealing
-with time series microbiome/biomarker data. This might be turned into an
+This repository contains some basic scripts that I've written for dealing
+with time series microbiome and dietary/medical data. This might be turned into an
 actual python package and/or QIIME 2 plugin sometime in the future, depending
 on how this codebase evolves.
 
@@ -23,7 +23,7 @@ This is based on three gists I've written before:
 ## `add_dietary_phase.py`
 
 This is a more complicated script. Essentially, it looks at an Excel
-spreadsheet containing dietary information (e.g. "Started Diet A", "Stopped
+spreadsheet containing dietary/drug information (e.g. "Started Diet A", "Stopped
 Diet A", ...) and encodes this information as a column in a metadata file. This
 is particularly useful if the same diet was started and stopped multiple times.
 
@@ -35,7 +35,7 @@ Note that this makes a few assumptions, in particular:
 
 Although I've looked at the outputs of this code manually, I don't have any
 automatic testing set up for it (yet). If you notice something funky with the
-output or behavior of this code, it's likely a bug -- feel free to raise an
+output or behavior of this code, it's likely a bug -- feel free to open an
 issue, PR, etc.
 
 ## Dependencies
