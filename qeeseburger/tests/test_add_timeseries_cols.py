@@ -1,5 +1,4 @@
 import pandas as pd
-from dateutil.parser import parse
 from ..add_timeseries_cols import _add_extra_cols
 
 
