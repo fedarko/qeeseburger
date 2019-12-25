@@ -16,10 +16,10 @@ def get_test_data():
         },
         index=["S1", "S2", "S3", "S4"],
     )
-    return "ABC", parse("1984-01-01"), m_df
+    return "ABC", "1984-01-01", m_df
 
 
 def test_good():
     new_metadata_df = _add_extra_cols(*(get_test_data()))
     assert new_metadata_df["is_collection_timestamp_valid"].all()
-    print(new_metadata_df)
+    # TODO test other cols...
