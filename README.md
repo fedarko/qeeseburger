@@ -4,12 +4,18 @@
 <img width="60%" src="https://raw.githubusercontent.com/fedarko/qeeseburger/master/images/logo.png" alt="Qeeseburger logo" />
 </div>
 
+<div align="center">
+<a href="https://travis-ci.org/fedarko/qeeseburger"><img src="https://travis-ci.org/fedarko/qeeseburger.svg?branch=master" alt="Build Status" /></a>
+<a href="https://codecov.io/gh/fedarko/qeeseburger"><img src="https://codecov.io/gh/fedarko/qeeseburger/branch/master/graph/badge.svg" alt="Code Coverage" /></a>
+<p>(Pronounced "cheeseburger.")
+</div>
+
 This repository contains some basic scripts that I've written for dealing
 with time series microbiome and dietary/medical data. This might be turned into an
 actual python package and/or QIIME 2 plugin sometime in the future, depending
 on how this codebase evolves.
 
-## `add_age_and_extra_times.py`
+## `add_timeseries_cols.py`
 
 This script adds some useful columns to a QIIME 2 compatible metadata file and
 writes out a new file. This isn't really anything fancy, and the code is pretty
@@ -33,8 +39,8 @@ Note that this makes a few assumptions, in particular:
 
 ## Disclaimer
 
-Although I've looked at the outputs of this code manually, I don't have any
-automatic testing set up for it (yet). If you notice something funky with the
+Although I've looked at the outputs of this code manually, the testing is still
+pretty basic.  If you notice something funky with the
 output or behavior of this code, it's likely a bug -- feel free to open an
 issue, PR, etc.
 
