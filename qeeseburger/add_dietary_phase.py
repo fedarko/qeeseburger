@@ -108,7 +108,9 @@ def add_dietary_phase(
         )
     if phase_name in m_df.columns:
         raise ValueError(
-            "A {} column already exists in the input metadata!".format(phase_name)
+            "A {} column already exists in the input metadata!".format(
+                phase_name
+            )
         )
 
     # Validate the key dates spreadsheet, somewhat
@@ -117,18 +119,25 @@ def add_dietary_phase(
     # answer: https://stackoverflow.com/a/57187654/10730311
     if not pd.api.types.is_datetime64_any_dtype(kd.index):
         raise ValueError(
-            "First column of the key dates spreadsheet must contain dates/timestamps"
+            "First column of the key dates spreadsheet must contain "
+            "dates/timestamps"
         )
     if "Event" not in kd.columns:
-        raise ValueError('Key dates spreadsheet must contain an "Event" column')
+        raise ValueError(
+            'Key dates spreadsheet must contain an "Event" column'
+        )
 
     # Determine ranges for starting/stopping a given diet (this requires a
     # decent amount of validation)
-    starting_dates = kd.loc[kd["Event"].str.find("Started {}".format(phase_name)) >= 0]
+    starting_dates = kd.loc[
+        kd["Event"].str.find("Started {}".format(phase_name)) >= 0
+    ]
     if len(starting_dates.index) < 1:
         raise ValueError("No starting dates for the specified phase given")
 
-    stopping_dates = kd.loc[kd["Event"].str.find("Stopped {}".format(phase_name)) >= 0]
+    stopping_dates = kd.loc[
+        kd["Event"].str.find("Stopped {}".format(phase_name)) >= 0
+    ]
     if len(stopping_dates.index) < 1:
         raise ValueError("No stopping dates for the specified phase given")
 

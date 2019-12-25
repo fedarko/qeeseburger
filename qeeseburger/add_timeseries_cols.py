@@ -5,55 +5,10 @@ from dateutil.relativedelta import relativedelta
 from qiime2 import Metadata
 
 
-@click.command()
-@click.option(
-    "-hsid",
-    "--host-subject-id",
-    required=True,
-    help="Host subject ID to set age for.",
-    type=str,
-)
-@click.option(
-    "-b",
-    "--host-birthday",
-    required=True,
-    help=(
-        "Birthday used for setting age. Must be in a format understood by "
-        "dateutil.parser.parse()."
-    ),
-    type=str,
-)
-@click.option(
-    "-i",
-    "--input-metadata-file",
-    required=True,
-    help=(
-        "Input metadata filepath. Must contain collection_timestamp and "
-        "host_subject_id columns."
-    ),
-    type=str,
-)
-@click.option(
-    "-o",
-    "--output-metadata-file",
-    required=True,
-    help="Output metadata filepath. Will contain some additional columns.",
-    type=str,
-)
-def add_columns(
-    host_subject_id, host_birthday, input_metadata_file, output_metadata_file
-) -> None:
-    """Add some useful columns for time-series studies to a metadata file.
+def _add_extra_cols(host_subject_id, host_birthday_datetime, metadata_df):
+    """Returns a DataFrame modified as expected."""
 
-    In particular, the columns added are "is_collection_timestamp_valid",
-    "host_age_years", "ordinal_timestamp", and "days_since_first_day".
-    """
-
-    host_birthday_datetime = parse(host_birthday)
-
-    m = Metadata.load(input_metadata_file)
-    m_df = m.to_dataframe()
-
+    m_df = metadata_df.copy()
     required_cols = {"host_subject_id", "collection_timestamp"}
     if len(required_cols & set(m_df.columns)) < len(required_cols):
         raise ValueError(
@@ -65,7 +20,7 @@ def add_columns(
         "host_age_years",
         "ordinal_timestamp",
         "days_since_first_day",
-        "is_collection_timestamp_invalid",
+        "is_collection_timestamp_valid",
     }
     if len(output_cols & set(m_df.columns)) > 0:
         raise ValueError(
@@ -162,7 +117,62 @@ def add_columns(
             days_since = (parsed_date - min_date).days
             m_df.loc[sample_id, "days_since_first_day"] = str(days_since)
 
-    Metadata(m_df).save(output_metadata_file)
+    return m_df
+
+
+@click.command()
+@click.option(
+    "-hsid",
+    "--host-subject-id",
+    required=True,
+    help="Host subject ID to set age for.",
+    type=str,
+)
+@click.option(
+    "-b",
+    "--host-birthday",
+    required=True,
+    help=(
+        "Birthday used for setting age. Must be in a format understood by "
+        "dateutil.parser.parse()."
+    ),
+    type=str,
+)
+@click.option(
+    "-i",
+    "--input-metadata-file",
+    required=True,
+    help=(
+        "Input metadata filepath. Must contain collection_timestamp and "
+        "host_subject_id columns."
+    ),
+    type=str,
+)
+@click.option(
+    "-o",
+    "--output-metadata-file",
+    required=True,
+    help="Output metadata filepath. Will contain some additional columns.",
+    type=str,
+)
+def add_columns(
+    host_subject_id, host_birthday, input_metadata_file, output_metadata_file
+) -> None:
+    """Add some useful columns for time-series studies to a metadata file.
+
+    In particular, the columns added are "is_collection_timestamp_valid",
+    "host_age_years", "ordinal_timestamp", and "days_since_first_day".
+    """
+
+    host_birthday_datetime = parse(host_birthday)
+
+    m = Metadata.load(input_metadata_file)
+    m_df = m.to_dataframe()
+
+    # ... Actually do relevant computations
+    m_df_new = _add_extra_cols(host_subject_id, host_birthday_datetime, m_df)
+
+    Metadata(m_df_new).save(output_metadata_file)
 
 
 if __name__ == "__main__":
