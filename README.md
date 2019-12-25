@@ -5,7 +5,7 @@
 </div>
 
 <div align="center">
-<a href="https://travis-ci.org/fedarko/qeeseburger"><img src="https://travis-ci.org/fedarko/qeeseburger.svg?branch=master" alt="Build Status" /></a>
+<a href="https://travis-ci.com/fedarko/qeeseburger"><img src="https://travis-ci.com/fedarko/qeeseburger.svg?branch=master" alt="Build Status" /></a>
 <a href="https://codecov.io/gh/fedarko/qeeseburger"><img src="https://codecov.io/gh/fedarko/qeeseburger/branch/master/graph/badge.svg" alt="Code Coverage" /></a>
 <p>(Pronounced "cheeseburger.")
 </div>
