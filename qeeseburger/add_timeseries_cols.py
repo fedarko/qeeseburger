@@ -5,8 +5,10 @@ from dateutil.relativedelta import relativedelta
 from qiime2 import Metadata
 
 
-def _add_extra_cols(host_subject_id, host_birthday_datetime, metadata_df):
+def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
     """Returns a DataFrame modified as expected."""
+
+    host_birthday_datetime = parse(host_birthday)
 
     m_df = metadata_df.copy()
     required_cols = {"host_subject_id", "collection_timestamp"}
@@ -164,13 +166,12 @@ def add_columns(
     "host_age_years", "ordinal_timestamp", and "days_since_first_day".
     """
 
-    host_birthday_datetime = parse(host_birthday)
-
+    # First off, load the metadata file and convert it to a DataFrame
     m = Metadata.load(input_metadata_file)
     m_df = m.to_dataframe()
 
     # ... Actually do relevant computations
-    m_df_new = _add_extra_cols(host_subject_id, host_birthday_datetime, m_df)
+    m_df_new = _add_extra_cols(host_subject_id, host_birthday, m_df)
 
     Metadata(m_df_new).save(output_metadata_file)
 
