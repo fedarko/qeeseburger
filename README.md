@@ -21,6 +21,12 @@ This script adds some useful columns to a QIIME 2 compatible metadata file and
 writes out a new file. This isn't really anything fancy, and the code is pretty
 inefficient because it's really just three separate scripts glued together.
 
+The columns added:
+1. `is_collection_timestamp_valid`
+2. `host_age_years`
+3. `ordinal_timestamp`
+4. `days_since_first_day`
+
 This is based on three gists I've written before:
 1. [`add_age_column_to_metadata.py`](https://gist.github.com/fedarko/49088da6bba5705f987192a954b2416f)
 2. [`convert_timestamp_to_ordinal_date.py`](https://gist.github.com/fedarko/05222da5b3f01ce9d77c6b989cf4d881)
