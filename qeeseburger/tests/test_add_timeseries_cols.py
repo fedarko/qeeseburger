@@ -6,12 +6,13 @@ from ..add_timeseries_cols import _add_extra_cols
 def get_test_data():
     m_df = pd.DataFrame(
         {
-            "host_subject_id": [
-                "ABC", "DEF", "ABC", "ABC"
-            ],
+            "host_subject_id": ["ABC", "DEF", "ABC", "ABC"],
             "collection_timestamp": [
-                "January 3, 2014", "January 4, 2014", "2014-01-05", "2015-01-14"
-            ]
+                "January 3, 2014",
+                "January 4, 2014",
+                "2014-01-05",
+                "2015-01-14",
+            ],
         },
         index=["S1", "S2", "S3", "S4"],
     )
