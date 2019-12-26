@@ -20,5 +20,29 @@ def get_test_data():
 
 def test_good():
     new_metadata_df = _add_extra_cols(*(get_test_data()))
+
+    # All of these timestamps are valid
     assert new_metadata_df["is_collection_timestamp_valid"].all()
-    # TODO test other cols...
+
+    # Check host_age_years values
+    assert new_metadata_df.loc["S1", "host_age_years"] == "30"
+    # This value is "not applicable" since S2's host_subject_id is DEF, not ABC
+    assert new_metadata_df.loc["S2", "host_age_years"] == "not applicable"
+    assert new_metadata_df.loc["S3", "host_age_years"] == "30"
+    assert new_metadata_df.loc["S4", "host_age_years"] == "31"
+
+    # Check ordinal_timestamp values
+    assert new_metadata_df.loc["S1", "ordinal_timestamp"] == "20140103"
+    assert new_metadata_df.loc["S2", "ordinal_timestamp"] == "20140104"
+    assert new_metadata_df.loc["S3", "ordinal_timestamp"] == "20140105"
+    assert new_metadata_df.loc["S4", "ordinal_timestamp"] == "20150114"
+
+    # Check days_since_first_day values
+    # Note that these are independent of the host_subject_id -- the "first day"
+    # is computed considering all valid collection_timestamp values
+    assert new_metadata_df.loc["S1", "days_since_first_day"] == "0"
+    assert new_metadata_df.loc["S2", "days_since_first_day"] == "1"
+    assert new_metadata_df.loc["S3", "days_since_first_day"] == "2"
+    # "Ground truth" value computed using
+    # https://www.timeanddate.com/date/durationresult.html?m1=1&d1=3&y1=2014&m2=1&d2=14&y2=2015
+    assert new_metadata_df.loc["S4", "days_since_first_day"] == "376"
