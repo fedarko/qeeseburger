@@ -5,8 +5,8 @@ test:
 	python3 -B -m pytest qeeseburger/tests --cov qeeseburger
 
 stylecheck:
-	flake8 qeeseburger/
-	black --check -l 79 qeeseburger/
+	flake8 qeeseburger/ setup.py
+	black --check -l 79 qeeseburger/ setup.py
 
 style:
-	black -l 79 qeeseburger/
+	black -l 79 qeeseburger/ setup.py
