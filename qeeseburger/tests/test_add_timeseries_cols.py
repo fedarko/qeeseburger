@@ -49,7 +49,7 @@ def test_good():
     assert new_metadata_df.loc["S4", "days_since_first_day"] == "376"
 
 
-def test_that_lack_of_required_cols_triggers_error():
+def test_lack_of_required_cols():
     cols_to_drop = [
         ["host_subject_id"],
         ["collection_timestamp"],
@@ -113,3 +113,20 @@ def test_invalid_timestamp():
     assert new_m_df.loc["S2", "days_since_first_day"] == "1"
     assert new_m_df.loc["S3", "days_since_first_day"] == "not applicable"
     assert new_m_df.loc["S4", "days_since_first_day"] == "376"
+
+
+def test_output_cols_in_input():
+    output_cols = {
+        "host_age_years",
+        "ordinal_timestamp",
+        "days_since_first_day",
+        "is_collection_timestamp_valid",
+    }
+    for c in output_cols:
+        host_subject_id, host_birthday, m_df = get_test_data()
+        m_df[c] = "blahblahblah"
+        with pytest.raises(ValueError) as einfo:
+            _add_extra_cols(host_subject_id, host_birthday, m_df)
+        assert (
+            "already includes at least one of the following columns"
+        ) in str(einfo.value)
