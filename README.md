@@ -35,6 +35,31 @@ The columns added:
 3. `ordinal_timestamp`
 4. `days_since_first_day`
 
+### Usage
+```
+$ add-ts-cols --help
+Usage: add-ts-cols [OPTIONS]
+
+  Add some useful columns for time-series studies to a metadata file.
+
+  In particular, the columns added are "is_collection_timestamp_valid",
+  "host_age_years", "ordinal_timestamp", and "days_since_first_day".
+
+Options:
+  -hsid, --host-subject-id TEXT   Host subject ID to set age for.  [required]
+  -b, --host-birthday TEXT        Birthday used for setting age. Must be in a
+                                  format understood by
+                                  dateutil.parser.parse().  [required]
+  -i, --input-metadata-file TEXT  Input metadata filepath. Must contain
+                                  collection_timestamp and host_subject_id
+                                  columns.  [required]
+  -o, --output-metadata-file TEXT
+                                  Output metadata filepath. Will contain some
+                                  additional columns.  [required]
+  --help                          Show this message and exit.
+```
+
+
 ### References
 This is based on three gists I've written before:
 1. [`add_age_column_to_metadata.py`](https://gist.github.com/fedarko/49088da6bba5705f987192a954b2416f)
@@ -51,6 +76,70 @@ is particularly useful if the same diet was started and stopped multiple times.
 Note that this makes a few assumptions, in particular:
 1. **That the dates in the spreadsheet are only precise down to the day.**
 2. **That "Stopped Diet A" dates do not count as days where that diet was followed:** that is, this treats the end-dates of dietary ranges in an "exclusive" manner.
+
+### Usage
+```
+$ add-diet --help
+Usage: add-diet [OPTIONS]
+
+  Encodes dietary phase information into a sample metadata file.
+
+  The main information needed for this are the phase name (-p) and the key
+  dates spreadsheet (-k). This program looks for rows in the key dates
+  spreadsheet where the "Event" column contains the text "Started PHASENAME"
+  or "Stopped PHASENAME", where PHASENAME is just the string you specified
+  in the -p option.
+
+  This program will then use the dates associated with these rows to
+  determine ranges of dates for which the given dietary phase was being
+  followed -- this is useful if the subject went on and off a diet multiple
+  times. The start date of a phase is counted as being in that range; the
+  end date is NOT counted as being in that range.
+
+  Finally, this will add a PHASENAME column to the metadata file. Samples
+  will be assigned one of three possible values in this column:
+
+      Samples where host_subject_id is equal to the -hsid parameter AND the
+      collection_timestamp falls within a dietary phase range will be
+      labelled "TRUE".
+
+      Samples where host_subject_id is equal to the -hsid parameter AND the
+      collection_timestamp DOES NOT fall within a dietary phase range will
+      be labelled "FALSE".
+
+      Samples where host_subject_id is NOT EQUAL to the -hsid parameter
+      will be labelled "not applicable".
+
+  This only treats dates as down to the day. So if the subject started a
+  diet at 12pm on a day and then ended that diet at 5pm that same day, this
+  code will treat both of these dates as occurring on the same day and thus
+  raise an error.
+
+Options:
+  -hsid, --host-subject-id TEXT   Host subject ID to set dietary phase for.
+                                  [required]
+  -p, --phase-name TEXT           Key word to look for in dietary phases. Any
+                                  rows in the key dates spreadsheet where the
+                                  'Event' column contains the text 'Started
+                                  PHASENAME' or 'Stopped PHASENAME', where
+                                  PHASENAME is the string you specify here,
+                                  will be treated as start/end range(s) for
+                                  that phase (these ranges are assumed to be
+                                  inclusive for the start date and exclusive
+                                  on the end date).  [required]
+  -k, --key-dates-spreadsheet TEXT
+                                  Filepath to an Excel spreadsheet containing
+                                  dates as the first column and 'Event' as the
+                                  second column.  [required]
+  -i, --input-metadata-file TEXT  Input metadata filepath. Must contain
+                                  collection_timestamp and host_subject_id
+                                  columns.  [required]
+  -o, --output-metadata-file TEXT
+                                  Output metadata filepath. Will contain a new
+                                  column named with whatever you set the -p
+                                  option to.  [required]
+  --help                          Show this message and exit.
+```
 
 ### Disclaimer
 
