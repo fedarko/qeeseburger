@@ -1,3 +1,4 @@
+import pytest
 import pandas as pd
 from ..add_timeseries_cols import _add_extra_cols
 
@@ -46,3 +47,17 @@ def test_good():
     # "Ground truth" value computed using
     # https://www.timeanddate.com/date/durationresult.html?m1=1&d1=3&y1=2014&m2=1&d2=14&y2=2015
     assert new_metadata_df.loc["S4", "days_since_first_day"] == "376"
+
+
+def test_that_lack_of_required_cols_triggers_error():
+    cols_to_drop = [
+        ["host_subject_id"],
+        ["collection_timestamp"],
+        ["collection_timestamp", "host_subject_id"],
+    ]
+    for c in cols_to_drop:
+        host_subject_id, host_birthday, m_df = get_test_data()
+        m_df.drop(c, axis="columns", inplace=True)
+        with pytest.raises(ValueError) as einfo:
+            _add_extra_cols(host_subject_id, host_birthday, m_df)
+        assert "must include the following columns" in str(einfo.value)
