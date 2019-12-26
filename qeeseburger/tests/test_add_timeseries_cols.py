@@ -85,3 +85,31 @@ def test_birthday_on_sampling_day():
     assert new_m_df.loc["S2", "host_age_years"] == "not applicable"
     assert new_m_df.loc["S3", "host_age_years"] == "0"
     assert new_m_df.loc["S4", "host_age_years"] == "1"
+
+
+def test_invalid_timestamp():
+    """Tests that samples with invalid timestamps are handled properly."""
+
+    host_subject_id, host_birthday, m_df = get_test_data()
+    m_df.loc["S3", "collection_timestamp"] = "asodifjoaisdjf"
+    new_m_df = _add_extra_cols(host_subject_id, host_birthday, m_df)
+
+    assert new_m_df.loc["S1", "is_collection_timestamp_valid"] == "True"
+    assert new_m_df.loc["S2", "is_collection_timestamp_valid"] == "True"
+    assert new_m_df.loc["S3", "is_collection_timestamp_valid"] == "False"
+    assert new_m_df.loc["S4", "is_collection_timestamp_valid"] == "True"
+
+    assert new_m_df.loc["S1", "host_age_years"] == "30"
+    assert new_m_df.loc["S2", "host_age_years"] == "not applicable"
+    assert new_m_df.loc["S3", "host_age_years"] == "not applicable"
+    assert new_m_df.loc["S4", "host_age_years"] == "31"
+
+    assert new_m_df.loc["S1", "ordinal_timestamp"] == "20140103"
+    assert new_m_df.loc["S2", "ordinal_timestamp"] == "20140104"
+    assert new_m_df.loc["S3", "ordinal_timestamp"] == "not applicable"
+    assert new_m_df.loc["S4", "ordinal_timestamp"] == "20150114"
+
+    assert new_m_df.loc["S1", "days_since_first_day"] == "0"
+    assert new_m_df.loc["S2", "days_since_first_day"] == "1"
+    assert new_m_df.loc["S3", "days_since_first_day"] == "not applicable"
+    assert new_m_df.loc["S4", "days_since_first_day"] == "376"
