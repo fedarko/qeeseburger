@@ -56,8 +56,11 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
                 sample_datetime = parse(str(sample_timestamp))
 
                 rd = relativedelta(sample_datetime, host_birthday_datetime)
-                # Sanity check: the subject should never be negative years old
-                if rd.years > 0:
+                # Sanity check: the birthday should occur before a timestamp
+                # (...at least, we're making the assumption that all of the
+                # host subject's samples were taken after the individual in
+                # question was born)
+                if sample_datetime >= host_birthday_datetime:
                     m_df.loc[sample_id, "host_age_years"] = str(rd.years)
                 else:
                     raise ValueError(
