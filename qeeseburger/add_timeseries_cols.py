@@ -30,7 +30,6 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
             "following columns: {}".format(output_cols)
         )
 
-    m_df["host_age_years"] = 0
     m_df["is_collection_timestamp_valid"] = "not applicable"
 
     # Add on is_collection_timestamp_valid column
@@ -46,6 +45,8 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
                     sample_timestamp, sample_id
                 )
             )
+
+    m_df["host_age_years"] = "not applicable"
 
     for sample_id in m_df.index:
         # We only compute age for samples with the specified host_subject_id
@@ -69,10 +70,6 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
                             "occurring before the host birthday of {}."
                         ).format(sample_id, sample_timestamp, host_birthday)
                     )
-            else:
-                m_df.loc[sample_id, "host_age_years"] = "not applicable"
-        else:
-            m_df.loc[sample_id, "host_age_years"] = "not applicable"
 
     # 2. Add ordinal timestamp for all samples
 
