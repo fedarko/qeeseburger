@@ -3,7 +3,13 @@ import arrow
 
 def strict_parse(
     timestamp,
-    expected_formats=["YYYY-MM-DD", "MM/DD/YYYY", "M/D/YY", "M/D/YYYY"],
+    expected_formats=[
+        "YYYY-MM-DD",
+        "YYYY-M-D",
+        "MM/DD/YYYY",
+        "M/D/YY",
+        "M/D/YYYY",
+    ],
 ):
     """Parses a timestamp; only succeeds if it contains a year, month, and day.
 
