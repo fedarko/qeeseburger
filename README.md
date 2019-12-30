@@ -150,8 +150,9 @@ issue, PR, etc.
 
 ## Dependencies
 
+- [Arrow](https://arrow.readthedocs.io/)
 - [Click](http://click.palletsprojects.com/)
-- [dateutil](https://dateutil.readthedocs.io/en/stable/)
+- [dateutil](https://dateutil.readthedocs.io/)
 - [pandas](https://pandas.pydata.org/)
 - [QIIME 2 (this uses the "Artifact API")](https://qiime2.org/)
 
