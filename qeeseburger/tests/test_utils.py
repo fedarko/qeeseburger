@@ -12,6 +12,11 @@ def test_good():
     assert strict_parse("12/17/2011") == date(2011, 12, 17)
 
 
+def test_slightly_funky_but_still_ostensibly_good():
+    assert strict_parse("2002-10-18: 19:45") == date(2002, 10, 18)
+    assert strict_parse("'2013-08-09") == date(2013, 8, 9)
+
+
 def test_fails_on_incomplete():
     with pytest.raises(ParserError):
         strict_parse("2012")

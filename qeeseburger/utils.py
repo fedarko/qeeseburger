@@ -7,8 +7,11 @@ def strict_parse(
         "YYYY-MM-DD",
         "YYYY-M-D",
         "MM/DD/YYYY",
-        "M/D/YY",
         "M/D/YYYY",
+        "M/D/YY",
+        # Idiosyncratic formats needed to parse some timestamps I've run into
+        "[']YYYY-MM-DD",
+        "YYYY-MM-DD[:]",
     ],
 ):
     """Parses a timestamp; only succeeds if it contains a year, month, and day.
