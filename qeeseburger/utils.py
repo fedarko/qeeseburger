@@ -30,6 +30,11 @@ def strict_parse(
        like 3 other libraries before I found something that did what I wanted
        (and even then I still think this solution is harder than it should be).
 
+       * You could argue that if the ambiguities occurred in a nonrandom way or
+       something then ignoring these could introduce bias into a study, but I
+       think "only look at samples with complete timestamps" is probably a
+       generally safe call.
+
        Parameters
        ----------
 
