@@ -1,14 +1,15 @@
 #! /usr/bin/env python3
 import click
-from dateutil.parser import parse
+from arrow import ParserError
 from dateutil.relativedelta import relativedelta
 from qiime2 import Metadata
+from .utils import strict_parse
 
 
 def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
     """Returns a DataFrame modified as expected."""
 
-    host_birthday_datetime = parse(host_birthday)
+    host_birthday_date = strict_parse(host_birthday)
 
     m_df = metadata_df.copy()
     required_cols = {"host_subject_id", "collection_timestamp"}
@@ -36,9 +37,9 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
     for sample_id in m_df.index:
         sample_timestamp = m_df["collection_timestamp"][sample_id]
         try:
-            sample_datetime = parse(str(sample_timestamp))
+            sample_date = strict_parse(str(sample_timestamp))
             m_df.loc[sample_id, "is_collection_timestamp_valid"] = "True"
-        except (ValueError, TypeError):
+        except ParserError:
             m_df.loc[sample_id, "is_collection_timestamp_valid"] = "False"
             print(
                 'WEIRD TIMESTAMP: "{}" for sample {}'.format(
@@ -54,14 +55,14 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
             if m_df.loc[sample_id, "is_collection_timestamp_valid"] == "True":
                 # Parse sample timestamp
                 sample_timestamp = m_df["collection_timestamp"][sample_id]
-                sample_datetime = parse(str(sample_timestamp))
+                sample_date = strict_parse(str(sample_timestamp))
 
-                rd = relativedelta(sample_datetime, host_birthday_datetime)
+                rd = relativedelta(sample_date, host_birthday_date)
                 # Sanity check: the birthday should occur before a timestamp
                 # (...at least, we're making the assumption that all of the
                 # host subject's samples were taken after the individual in
                 # question was born)
-                if sample_datetime >= host_birthday_datetime:
+                if sample_date >= host_birthday_date:
                     m_df.loc[sample_id, "host_age_years"] = str(rd.years)
                 else:
                     raise ValueError(
@@ -77,10 +78,10 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
 
     for sample_id in m_df.index:
         if m_df.loc[sample_id, "is_collection_timestamp_valid"] == "True":
-            parsed_date = parse(
+            parsed_date = strict_parse(
                 str(m_df.loc[sample_id, "collection_timestamp"])
             )
-            parsed_date_ordinalstring = parsed_date.isoformat()[:10].replace(
+            parsed_date_ordinalstring = parsed_date.isoformat().replace(
                 "-", ""
             )
             m_df.loc[
@@ -93,7 +94,7 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
     min_date = None
     for sample_id in m_df.index:
         if m_df.loc[sample_id, "is_collection_timestamp_valid"] == "True":
-            parsed_date = parse(
+            parsed_date = strict_parse(
                 str(m_df.loc[sample_id, "collection_timestamp"])
             )
             if min_date is None or parsed_date < min_date:
@@ -111,7 +112,7 @@ def _add_extra_cols(host_subject_id, host_birthday, metadata_df):
 
     for sample_id in m_df.index:
         if m_df.loc[sample_id, "is_collection_timestamp_valid"] == "True":
-            parsed_date = parse(
+            parsed_date = strict_parse(
                 str(m_df.loc[sample_id, "collection_timestamp"])
             )
             # Note the avoidance of relativedelta -- see

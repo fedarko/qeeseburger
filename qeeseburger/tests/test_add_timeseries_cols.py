@@ -8,8 +8,8 @@ def get_test_data():
         {
             "host_subject_id": ["ABC", "DEF", "ABC", "ABC"],
             "collection_timestamp": [
-                "January 3, 2014",
-                "January 4, 2014",
+                "1/3/14",
+                "1/4/2014",
                 "2014-01-05",
                 "2015-01-14",
             ],
@@ -65,21 +65,21 @@ def test_lack_of_required_cols():
 
 def test_impossible_birthday():
     host_subject_id, host_birthday, m_df = get_test_data()
-    host_birthday = "March 10, 2014"
+    host_birthday = "2014-03-10"
     with pytest.raises(ValueError) as einfo:
         _add_extra_cols(host_subject_id, host_birthday, m_df)
     # S1 is expected to come up in the error message because it's the first in
     # the index
     assert (
-        "Sample S1 has a collection_timestamp, January 3, 2014, occurring "
-        "before the host birthday of March 10, 2014."
+        "Sample S1 has a collection_timestamp, 1/3/14, occurring "
+        "before the host birthday of 2014-03-10."
     ) in str(einfo.value)
 
 
 def test_birthday_on_sampling_day():
     host_subject_id, host_birthday, m_df = get_test_data()
     # This should work -- the host will just have a host_age_years value of 0
-    host_birthday = "January 3, 2014"
+    host_birthday = "2014-01-03"
     new_m_df = _add_extra_cols(host_subject_id, host_birthday, m_df)
     assert new_m_df.loc["S1", "host_age_years"] == "0"
     assert new_m_df.loc["S2", "host_age_years"] == "not applicable"

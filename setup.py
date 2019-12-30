@@ -37,7 +37,7 @@ setup(
     url="https://github.com/fedarko/qeeseburger",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=["click", "python-dateutil", "pandas"],
+    install_requires=["click", "arrow", "python-dateutil", "pandas"],
     # Based on how Altair splits up its requirements:
     # https://github.com/altair-viz/altair/blob/master/setup.py
     extras_require={
