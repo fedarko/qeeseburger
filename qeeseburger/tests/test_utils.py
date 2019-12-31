@@ -34,4 +34,4 @@ def test_fails_on_incomplete():
         strict_parse("3/2019")
 
     with pytest.raises(ParserError):
-        strict_parse("3/2019")
+        strict_parse("3/19")
