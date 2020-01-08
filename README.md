@@ -27,13 +27,12 @@ Once installing Qeeseburger, a few scripts will be available:
 
 This script adds some useful columns to a QIIME 2 compatible metadata file and
 writes out a new file. This isn't really anything fancy, and the code is pretty
-inefficient because it's really just three separate scripts glued together.
+inefficient because it's really just a few separate scripts glued together.
 
 The columns added:
 1. `is_collection_timestamp_valid`
-2. `host_age_years`
-3. `ordinal_timestamp`
-4. `days_since_first_day`
+2. `ordinal_timestamp`
+3. `days_since_first_day`
 
 ### Usage
 ```
@@ -43,16 +42,18 @@ Usage: add-ts-cols [OPTIONS]
   Add some useful columns for time-series studies to a metadata file.
 
   In particular, the columns added are "is_collection_timestamp_valid",
-  "host_age_years", "ordinal_timestamp", and "days_since_first_day".
+  "ordinal_timestamp", and "days_since_first_day".
+
+  Note that the value of days_since_first_day may vary even between samples
+  with identical collection_timestamp values if you run this script on
+  different metadata files. This is because the "first day" is computed
+  relative to all of the valid collection_timestamps in the input metadata
+  file; to ensure that the values in this column are comparable between
+  datasets, you should merge metadata and then run this script.
 
 Options:
-  -hsid, --host-subject-id TEXT   Host subject ID to set age for.  [required]
-  -b, --host-birthday TEXT        Birthday used for setting age. Must be in a
-                                  format understood by
-                                  dateutil.parser.parse().  [required]
-  -i, --input-metadata-file TEXT  Input metadata filepath. Must contain
-                                  collection_timestamp and host_subject_id
-                                  columns.  [required]
+  -i, --input-metadata-file TEXT  Input metadata filepath. Must contain a
+                                  collection_timestamp column.  [required]
   -o, --output-metadata-file TEXT
                                   Output metadata filepath. Will contain some
                                   additional columns.  [required]
@@ -61,10 +62,9 @@ Options:
 
 
 ### References
-This is based on three gists I've written before:
-1. [`add_age_column_to_metadata.py`](https://gist.github.com/fedarko/49088da6bba5705f987192a954b2416f)
-2. [`convert_timestamp_to_ordinal_date.py`](https://gist.github.com/fedarko/05222da5b3f01ce9d77c6b989cf4d881)
-3. [`convert_timestamp_to_days_elapsed.py`](https://gist.github.com/fedarko/647241b3f06ca76c1ccb6bcbd7fc778d)
+This is based on some gists I've written before:
+1. [`convert_timestamp_to_ordinal_date.py`](https://gist.github.com/fedarko/05222da5b3f01ce9d77c6b989cf4d881)
+2. [`convert_timestamp_to_days_elapsed.py`](https://gist.github.com/fedarko/647241b3f06ca76c1ccb6bcbd7fc778d)
 
 ## 2. `add-diet`
 
