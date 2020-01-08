@@ -124,6 +124,13 @@ def add_columns(input_metadata_file, output_metadata_file) -> None:
 
     In particular, the columns added are "is_collection_timestamp_valid",
     "ordinal_timestamp", and "days_since_first_day".
+
+    Note that the value of days_since_first_day may vary even between samples
+    with identical collection_timestamp values if you run this script on
+    different metadata files. This is because the "first day" is computed
+    relative to all of the valid collection_timestamps in the input metadata
+    file; to ensure that the values in this column are comparable between
+    datasets, you should merge metadata and then run this script.
     """
 
     # First off, load the metadata file and convert it to a DataFrame
