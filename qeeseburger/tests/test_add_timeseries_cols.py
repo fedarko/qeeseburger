@@ -4,7 +4,7 @@ from ..add_timeseries_cols import _add_extra_cols
 
 
 def get_test_data():
-    m_df = pd.DataFrame(
+    return pd.DataFrame(
         {
             "host_subject_id": ["ABC", "DEF", "ABC", "ABC"],
             "collection_timestamp": [
@@ -16,21 +16,13 @@ def get_test_data():
         },
         index=["S1", "S2", "S3", "S4"],
     )
-    return "ABC", "1984-01-01", m_df
 
 
 def test_good():
-    new_metadata_df = _add_extra_cols(*(get_test_data()))
+    new_metadata_df = _add_extra_cols(get_test_data())
 
     # All of these timestamps are valid
     assert new_metadata_df["is_collection_timestamp_valid"].all()
-
-    # Check host_age_years values
-    assert new_metadata_df.loc["S1", "host_age_years"] == "30"
-    # This value is "not applicable" since S2's host_subject_id is DEF, not ABC
-    assert new_metadata_df.loc["S2", "host_age_years"] == "not applicable"
-    assert new_metadata_df.loc["S3", "host_age_years"] == "30"
-    assert new_metadata_df.loc["S4", "host_age_years"] == "31"
 
     # Check ordinal_timestamp values
     assert new_metadata_df.loc["S1", "ordinal_timestamp"] == "20140103"
@@ -39,7 +31,7 @@ def test_good():
     assert new_metadata_df.loc["S4", "ordinal_timestamp"] == "20150114"
 
     # Check days_since_first_day values
-    # Note that these are independent of the host_subject_id -- the "first day"
+    # Note that these are independent of any host_subject_id -- the "first day"
     # is computed considering all valid collection_timestamp values
     assert new_metadata_df.loc["S1", "days_since_first_day"] == "0"
     assert new_metadata_df.loc["S2", "days_since_first_day"] == "1"
@@ -50,59 +42,24 @@ def test_good():
 
 
 def test_lack_of_required_cols():
-    cols_to_drop = [
-        ["host_subject_id"],
-        ["collection_timestamp"],
-        ["collection_timestamp", "host_subject_id"],
-    ]
-    for c in cols_to_drop:
-        host_subject_id, host_birthday, m_df = get_test_data()
-        m_df.drop(c, axis="columns", inplace=True)
-        with pytest.raises(ValueError) as einfo:
-            _add_extra_cols(host_subject_id, host_birthday, m_df)
-        assert "must include the following columns" in str(einfo.value)
-
-
-def test_impossible_birthday():
-    host_subject_id, host_birthday, m_df = get_test_data()
-    host_birthday = "2014-03-10"
+    m_df = get_test_data()
+    m_df.drop(["collection_timestamp"], axis="columns", inplace=True)
     with pytest.raises(ValueError) as einfo:
-        _add_extra_cols(host_subject_id, host_birthday, m_df)
-    # S1 is expected to come up in the error message because it's the first in
-    # the index
-    assert (
-        "Sample S1 has a collection_timestamp, 1/3/14, occurring "
-        "before the host birthday of 2014-03-10."
-    ) in str(einfo.value)
-
-
-def test_birthday_on_sampling_day():
-    host_subject_id, host_birthday, m_df = get_test_data()
-    # This should work -- the host will just have a host_age_years value of 0
-    host_birthday = "2014-01-03"
-    new_m_df = _add_extra_cols(host_subject_id, host_birthday, m_df)
-    assert new_m_df.loc["S1", "host_age_years"] == "0"
-    assert new_m_df.loc["S2", "host_age_years"] == "not applicable"
-    assert new_m_df.loc["S3", "host_age_years"] == "0"
-    assert new_m_df.loc["S4", "host_age_years"] == "1"
+        _add_extra_cols(m_df)
+    assert "must include the following columns" in str(einfo.value)
 
 
 def test_invalid_timestamp():
     """Tests that samples with invalid timestamps are handled properly."""
 
-    host_subject_id, host_birthday, m_df = get_test_data()
+    m_df = get_test_data()
     m_df.loc["S3", "collection_timestamp"] = "asodifjoaisdjf"
-    new_m_df = _add_extra_cols(host_subject_id, host_birthday, m_df)
+    new_m_df = _add_extra_cols(m_df)
 
     assert new_m_df.loc["S1", "is_collection_timestamp_valid"] == "True"
     assert new_m_df.loc["S2", "is_collection_timestamp_valid"] == "True"
     assert new_m_df.loc["S3", "is_collection_timestamp_valid"] == "False"
     assert new_m_df.loc["S4", "is_collection_timestamp_valid"] == "True"
-
-    assert new_m_df.loc["S1", "host_age_years"] == "30"
-    assert new_m_df.loc["S2", "host_age_years"] == "not applicable"
-    assert new_m_df.loc["S3", "host_age_years"] == "not applicable"
-    assert new_m_df.loc["S4", "host_age_years"] == "31"
 
     assert new_m_df.loc["S1", "ordinal_timestamp"] == "20140103"
     assert new_m_df.loc["S2", "ordinal_timestamp"] == "20140104"
@@ -117,16 +74,15 @@ def test_invalid_timestamp():
 
 def test_output_cols_in_input():
     output_cols = {
-        "host_age_years",
         "ordinal_timestamp",
         "days_since_first_day",
         "is_collection_timestamp_valid",
     }
     for c in output_cols:
-        host_subject_id, host_birthday, m_df = get_test_data()
+        m_df = get_test_data()
         m_df[c] = "blahblahblah"
         with pytest.raises(ValueError) as einfo:
-            _add_extra_cols(host_subject_id, host_birthday, m_df)
+            _add_extra_cols(m_df)
         assert (
             "already includes at least one of the following columns"
         ) in str(einfo.value)
