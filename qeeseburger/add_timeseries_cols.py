@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from qiime2 import Metadata
 from .utils import strict_parse
 
+
 def check_cols_present(df, required_cols):
     """Checks that a collection of columns are all present in a DataFrame."""
 
@@ -13,6 +14,7 @@ def check_cols_present(df, required_cols):
             "Input metadata file must include the following "
             "columns: {}".format(required_cols)
         )
+
 
 def check_cols_not_present(df, disallowed_cols):
     """Checks that a collection of columns are all absent from a DataFrame."""
@@ -29,11 +31,14 @@ def _add_extra_cols(metadata_df):
 
     m_df = metadata_df.copy()
     check_cols_present(m_df, {"collection_timestamp"})
-    check_cols_not_present(m_df, {
-        "ordinal_timestamp",
-        "days_since_first_day",
-        "is_collection_timestamp_valid",
-    })
+    check_cols_not_present(
+        m_df,
+        {
+            "ordinal_timestamp",
+            "days_since_first_day",
+            "is_collection_timestamp_valid",
+        },
+    )
 
     m_df["is_collection_timestamp_valid"] = "not applicable"
 
@@ -119,9 +124,7 @@ def _add_extra_cols(metadata_df):
     help="Output metadata filepath. Will contain some additional columns.",
     type=str,
 )
-def add_columns(
-    input_metadata_file, output_metadata_file
-) -> None:
+def add_columns(input_metadata_file, output_metadata_file) -> None:
     """Add some useful columns for time-series studies to a metadata file.
 
     In particular, the columns added are "is_collection_timestamp_valid",
