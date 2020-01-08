@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 import click
 from arrow import ParserError
-from dateutil.relativedelta import relativedelta
 from qiime2 import Metadata
 from .utils import strict_parse
 
@@ -46,15 +45,11 @@ def _add_extra_cols(metadata_df):
     for sample_id in m_df.index:
         sample_timestamp = m_df["collection_timestamp"][sample_id]
         try:
-            sample_date = strict_parse(str(sample_timestamp))
+            strict_parse(str(sample_timestamp))
+            # If strict_parse() didn't fail, the timestamp should be valid
             m_df.loc[sample_id, "is_collection_timestamp_valid"] = "True"
         except ParserError:
             m_df.loc[sample_id, "is_collection_timestamp_valid"] = "False"
-            print(
-                'WEIRD TIMESTAMP: "{}" for sample {}'.format(
-                    sample_timestamp, sample_id
-                )
-            )
 
     # 2. Add ordinal timestamp for all samples
 
