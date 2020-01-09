@@ -39,33 +39,31 @@ def _add_extra_cols(metadata_df):
         },
     )
 
-    m_df["is_collection_timestamp_valid"] = "not applicable"
+    def get_time_validity(row):
+        try:
+            strict_parse(row["collection_timestamp"])
+            # If strict_parse() didn't fail, the timestamp should be valid
+            return "True"
+        except ParserError:
+            return "False"
 
     # 1. Add on is_collection_timestamp_valid column
-    for sample_id in m_df.index:
-        sample_timestamp = m_df["collection_timestamp"][sample_id]
-        try:
-            strict_parse(str(sample_timestamp))
-            # If strict_parse() didn't fail, the timestamp should be valid
-            m_df.loc[sample_id, "is_collection_timestamp_valid"] = "True"
-        except ParserError:
-            m_df.loc[sample_id, "is_collection_timestamp_valid"] = "False"
+    # Use of apply() over a basic loop based on
+    # https://engineering.upside.com/a-beginners-guide-to-optimizing-pandas-code-for-speed-c09ef2c6a4d6
+    m_df["is_collection_timestamp_valid"] = m_df.apply(
+        get_time_validity, axis=1
+    )
 
     # 2. Add ordinal timestamp for all samples
 
-    m_df["ordinal_timestamp"] = "not applicable"
+    def get_ordinal_timestamp(row):
+        if row["is_collection_timestamp_valid"] == "True":
+            parsed_date = strict_parse(row["collection_timestamp"])
+            return parsed_date.isoformat().replace("-", "")
+        else:
+            return "not applicable"
 
-    for sample_id in m_df.index:
-        if m_df.loc[sample_id, "is_collection_timestamp_valid"] == "True":
-            parsed_date = strict_parse(
-                str(m_df.loc[sample_id, "collection_timestamp"])
-            )
-            parsed_date_ordinalstring = parsed_date.isoformat().replace(
-                "-", ""
-            )
-            m_df.loc[
-                sample_id, "ordinal_timestamp"
-            ] = parsed_date_ordinalstring
+    m_df["ordinal_timestamp"] = m_df.apply(get_ordinal_timestamp, axis=1)
 
     # 3. Add days elapsed
 
