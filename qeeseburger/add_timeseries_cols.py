@@ -44,7 +44,14 @@ def _add_extra_cols(metadata_df):
 
     def get_time_validity_and_parse_date(row):
         try:
-            date = strict_parse(row["collection_timestamp"])
+            # we convert the timestamp to a string just in case it's something
+            # funky like a float
+            # (non-str timestamps could ostensibly be valid, for example if
+            # they're all formatted like 20200109. that being said, doing this
+            # conversion here makes me feel dirty so if you're reading this i
+            # still recommend that timestamps be specified as strings from the
+            # get-go.)
+            date = strict_parse(str(row["collection_timestamp"]))
             sampleid2date[row.name] = date
             # If strict_parse() didn't fail, the timestamp should be valid
             return "True"
