@@ -39,9 +39,13 @@ def _add_extra_cols(metadata_df):
         },
     )
 
-    def get_time_validity(row):
+    # only call strict_parse() on sample timestamps once
+    sampleid2date = {}
+
+    def get_time_validity_and_parse_date(row):
         try:
-            strict_parse(row["collection_timestamp"])
+            date = strict_parse(row["collection_timestamp"])
+            sampleid2date[row.name] = date
             # If strict_parse() didn't fail, the timestamp should be valid
             return "True"
         except ParserError:
@@ -51,15 +55,14 @@ def _add_extra_cols(metadata_df):
     # Use of apply() over a basic loop based on
     # https://engineering.upside.com/a-beginners-guide-to-optimizing-pandas-code-for-speed-c09ef2c6a4d6
     m_df["is_collection_timestamp_valid"] = m_df.apply(
-        get_time_validity, axis=1
+        get_time_validity_and_parse_date, axis=1
     )
 
     # 2. Add ordinal timestamp for all samples
 
     def get_ordinal_timestamp(row):
         if row["is_collection_timestamp_valid"] == "True":
-            parsed_date = strict_parse(row["collection_timestamp"])
-            return parsed_date.isoformat().replace("-", "")
+            return sampleid2date[row.name].isoformat().replace("-", "")
         else:
             return "not applicable"
 
@@ -68,34 +71,26 @@ def _add_extra_cols(metadata_df):
     # 3. Add days elapsed
 
     # 3.1. Compute earliest date
-    min_date = None
-    for sample_id in m_df.index:
-        if m_df.loc[sample_id, "is_collection_timestamp_valid"] == "True":
-            parsed_date = strict_parse(
-                str(m_df.loc[sample_id, "collection_timestamp"])
-            )
-            if min_date is None or parsed_date < min_date:
-                min_date = parsed_date
+    min_date = min(sampleid2date.values())
 
     print("Earliest date is {}.".format(min_date))
 
     # 3.2. Assign "days from first timestamp" metric for each sample
     # (the sample(s) taken on min_date should have a value of 0, and samples
-    # taken exactly a day later would have a value of 1, ...)
+    # taken on the next day day later would have a value of 1, ...)
     # There is some inherent imprecision here due to different levels of
     # precision in sample collection (e.g. down to the day vs. down to the
     # minute), but this should be sufficient for exploratory visualization.
-    m_df["days_since_first_day"] = "not applicable"
 
-    for sample_id in m_df.index:
-        if m_df.loc[sample_id, "is_collection_timestamp_valid"] == "True":
-            parsed_date = strict_parse(
-                str(m_df.loc[sample_id, "collection_timestamp"])
-            )
+    def get_days_since(row):
+        if row["is_collection_timestamp_valid"] == "True":
             # Note the avoidance of relativedelta -- see
             # https://stackoverflow.com/a/48262147/10730311
-            days_since = (parsed_date - min_date).days
-            m_df.loc[sample_id, "days_since_first_day"] = str(days_since)
+            return str((sampleid2date[row.name] - min_date).days)
+        else:
+            return "not applicable"
+
+    m_df["days_since_first_day"] = m_df.apply(get_days_since, axis=1)
 
     return m_df
 
