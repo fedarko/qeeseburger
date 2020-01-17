@@ -26,8 +26,7 @@ Once installing Qeeseburger, a few scripts will be available:
 ## 1. `add-ts-cols`
 
 This script adds some useful columns to a QIIME 2 compatible metadata file and
-writes out a new file. This isn't really anything fancy, and the code is pretty
-inefficient because it's really just a few separate scripts glued together.
+writes out a new file.
 
 The columns added:
 1. `is_collection_timestamp_valid`
@@ -60,13 +59,46 @@ Options:
   --help                          Show this message and exit.
 ```
 
-
 ### References
 This is based on some gists I've written before:
 1. [`convert_timestamp_to_ordinal_date.py`](https://gist.github.com/fedarko/05222da5b3f01ce9d77c6b989cf4d881)
 2. [`convert_timestamp_to_days_elapsed.py`](https://gist.github.com/fedarko/647241b3f06ca76c1ccb6bcbd7fc778d)
 
-## 2. `add-diet`
+## 2. `add-host-ages`
+
+Similar to `add-ts-cols`, this script adds in a `host_age_years` column to a
+metadata file. You can specify multiple host IDs/birthdays in comma-separated
+lists, so this is useful for timeseries datasets where you have multiple
+subjects.
+
+### Usage
+```
+Usage: add-host-ages [OPTIONS]
+
+  Add host age in years on to a metadata file.
+
+Options:
+  -i, --input-metadata-file TEXT  Input metadata filepath. Must contain
+                                  collection_timestamp and host_subject_id
+                                  columns.  [required]
+  -h, --host-id-list TEXT         List of host subject IDs, separated by
+                                  commas.  [required]
+  -b, --host-birthday-list TEXT   List of host birthdays, separated by commas.
+                                  Each birthday should be in YYYY-MM-DD
+                                  format, and the number of birthdays should
+                                  match the number of host IDs specified.
+                                  [required]
+  -o, --output-metadata-file TEXT
+                                  Output metadata filepath. Will contain a
+                                  host_age_years column.  [required]
+  --help                          Show this message and exit.
+```
+
+### References
+This is based on this gist I wrote a while back:
+1. [`add_age_column_to_metadata.py`](https://gist.github.com/fedarko/49088da6bba5705f987192a954b2416f)
+
+## 3. `add-diet`
 
 This is a more complicated script. Essentially, it looks at an Excel
 spreadsheet containing dietary/drug information (e.g. "Started Diet A", "Stopped
