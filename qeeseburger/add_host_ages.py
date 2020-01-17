@@ -2,8 +2,12 @@
 import click
 from dateutil.relativedelta import relativedelta
 from arrow import ParserError
-from qiime2 import Metadata
-from .utils import strict_parse, check_cols_present, check_cols_not_present
+from .utils import (
+    strict_parse,
+    check_cols_present,
+    check_cols_not_present,
+    manipulate_md,
+)
 
 
 def _add_host_ages(metadata_df, host_ids, host_birthdays):
@@ -113,15 +117,12 @@ def add_host_ages(
 ) -> None:
     """Add host age in years on to a metadata file."""
 
-    # First off, load the metadata file and convert it to a DataFrame
-    m = Metadata.load(input_metadata_file)
-    m_df = m.to_dataframe()
-
-    # ... Actually do relevant computations
-    m_df_new = _add_host_ages(m_df, host_id_list, host_birthday_list)
-
-    # Convert modified DataFrame back into a q2 Metadata object and save it
-    Metadata(m_df_new).save(output_metadata_file)
+    manipulate_md(
+        input_metadata_file,
+        [host_id_list, host_birthday_list],
+        output_metadata_file,
+        _add_host_ages,
+    )
 
 
 if __name__ == "__main__":

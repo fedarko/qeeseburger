@@ -1,3 +1,4 @@
+from qiime2 import Metadata
 import arrow
 
 
@@ -89,3 +90,24 @@ def check_cols_not_present(df, disallowed_cols):
             "Input metadata file already includes at least one of the "
             "following columns: {}".format(disallowed_cols)
         )
+
+
+def manipulate_md(
+    input_metadata_file, param_list, output_metadata_file, modification_func
+):
+    """Automates a common I/O paradigm in Qeeseburger's scripts.
+
+       Loads a metadata file as a pandas DataFrame, calls modification_func on
+       the DF with some specified parameters (can be an empty list if there are
+       no other parameters besides the metadata file), and outputs the modified
+       metadata DF to an output path.
+    """
+    # First off, load the metadata file and convert it to a DataFrame
+    m = Metadata.load(input_metadata_file)
+    m_df = m.to_dataframe()
+
+    # ... Actually do relevant computations
+    m_df_new = modification_func(m_df, *param_list)
+
+    # Convert modified DataFrame back into a q2 Metadata object and save it
+    Metadata(m_df_new).save(output_metadata_file)

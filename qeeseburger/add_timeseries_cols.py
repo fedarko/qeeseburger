@@ -1,8 +1,12 @@
 #! /usr/bin/env python3
 import click
 from arrow import ParserError
-from qiime2 import Metadata
-from .utils import strict_parse, check_cols_present, check_cols_not_present
+from .utils import (
+    strict_parse,
+    check_cols_present,
+    check_cols_not_present,
+    manipulate_md,
+)
 
 
 def _add_extra_cols(metadata_df):
@@ -112,16 +116,9 @@ def add_columns(input_metadata_file, output_metadata_file) -> None:
     file; to ensure that the values in this column are comparable between
     datasets, you should merge metadata and then run this script.
     """
-
-    # First off, load the metadata file and convert it to a DataFrame
-    m = Metadata.load(input_metadata_file)
-    m_df = m.to_dataframe()
-
-    # ... Actually do relevant computations
-    m_df_new = _add_extra_cols(m_df)
-
-    # Convert modified DataFrame back into a q2 Metadata object and save it
-    Metadata(m_df_new).save(output_metadata_file)
+    manipulate_md(
+        input_metadata_file, [], output_metadata_file, _add_extra_cols
+    )
 
 
 if __name__ == "__main__":
