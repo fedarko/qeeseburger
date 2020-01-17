@@ -47,6 +47,7 @@ setup(
     entry_points={
         "console_scripts": [
             "add-ts-cols=qeeseburger.add_timeseries_cols:add_columns",
+            "add-host-ages=qeeseburger.add_host_ages:add_host_ages",
             "add-diet=qeeseburger.add_dietary_phase:add_dietary_phase",
         ],
     },

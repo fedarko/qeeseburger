@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 import click
+from dateutil.relativedelta import relativedelta
 from arrow import ParserError
 from qiime2 import Metadata
 from .utils import strict_parse, check_cols_present, check_cols_not_present
@@ -9,69 +10,65 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays):
     """Returns a DataFrame with a host_age_years column added."""
 
     m_df = metadata_df.copy()
-    check_cols_present(m_df, {"collection_timestamp"})
+
+    # Validate input a bit
+    check_cols_present(m_df, {"collection_timestamp", "host_subject_id"})
     check_cols_not_present(m_df, {"host_age_years"})
 
-    # only call strict_parse() on sample timestamps once
-    sampleid2date = {}
+    host_id_list = [i.strip() for i in host_ids.split(",")]
+    host_bday_list = [i.strip() for i in host_birthdays.split(",")]
 
-    def get_time_validity_and_parse_date(row):
-        try:
-            # we convert the timestamp to a string just in case it's something
-            # funky like a float
-            # (non-str timestamps could ostensibly be valid, for example if
-            # they're all formatted like 20200109. that being said, doing this
-            # conversion here makes me feel dirty so if you're reading this i
-            # still recommend that timestamps be specified as strings from the
-            # get-go.)
-            date = strict_parse(str(row["collection_timestamp"]))
-            sampleid2date[row.name] = date
-            # If strict_parse() didn't fail, the timestamp should be valid
-            return "True"
-        except ParserError:
-            return "False"
+    for t in (host_id_list, host_bday_list):
+        if len(t) == 0 or (len(t) == 1 and t[0] == ""):
+            raise ValueError("No host IDs and/or birthdays were specified.")
 
-    # 1. Add on is_collection_timestamp_valid column
-    # Use of apply() over a basic loop based on
-    # https://engineering.upside.com/a-beginners-guide-to-optimizing-pandas-code-for-speed-c09ef2c6a4d6
-    m_df["is_collection_timestamp_valid"] = m_df.apply(
-        get_time_validity_and_parse_date, axis=1
-    )
+    if len(host_id_list) != len(host_bday_list):
+        raise ValueError(
+            "Number of host IDs doesn't match number of birthdays."
+        )
 
-    # 2. Add ordinal timestamp for all samples
+    if len(set(host_id_list)) != len(host_id_list):
+        raise ValueError("The specified host IDs aren't unique?")
 
-    def get_ordinal_timestamp(row):
-        if row["is_collection_timestamp_valid"] == "True":
-            return sampleid2date[row.name].isoformat().replace("-", "")
+    try:
+        host_bday_date_list = [strict_parse(s) for s in host_bday_list]
+    except ParserError:
+        raise ValueError("(Some of) the birthdays aren't correctly formatted.")
+
+    # figure out what host has what birthday
+    # precomputing this dict should save some time
+    hostid2bdaydate = {}
+    for i in range(len(host_id_list)):
+        hostid2bdaydate[host_id_list[i]] = host_bday_date_list[i]
+
+    def get_host_age_if_poss(row):
+        sample_hostid = row["host_subject_id"]
+        # Is this sample from a host we care about?
+        if sample_hostid in host_id_list:
+            # Try to parse sample date
+            try:
+                sample_date = strict_parse(str(row["collection_timestamp"]))
+            except ParserError:
+                # can't get the age for this sample -- timestamp is invalid
+                return "not applicable"
+            # Check that the date actually occurs after/on the sample's host's
+            # birthday...
+            host_bday_date = hostid2bdaydate[sample_hostid]
+            if sample_date >= host_bday_date:
+                # Success! Return the age in (integer) years expressed as
+                # a string
+                return str(relativedelta(sample_date, host_bday_date).years)
+            else:
+                raise ValueError(
+                    "Sample {} has a timestamp date, {}, occurring before the "
+                    "host birthday date of {}.".format(
+                        row.index, sample_date, host_bday_date
+                    )
+                )
         else:
             return "not applicable"
 
-    m_df["ordinal_timestamp"] = m_df.apply(get_ordinal_timestamp, axis=1)
-
-    # 3. Add days elapsed
-
-    # 3.1. Compute earliest date
-    min_date = min(sampleid2date.values())
-
-    print("Earliest date is {}.".format(min_date))
-
-    # 3.2. Assign "days from first timestamp" metric for each sample
-    # (the sample(s) taken on min_date should have a value of 0, and samples
-    # taken on the next day day later would have a value of 1, ...)
-    # There is some inherent imprecision here due to different levels of
-    # precision in sample collection (e.g. down to the day vs. down to the
-    # minute), but this should be sufficient for exploratory visualization.
-
-    def get_days_since(row):
-        if row["is_collection_timestamp_valid"] == "True":
-            # Note the avoidance of relativedelta -- see
-            # https://stackoverflow.com/a/48262147/10730311
-            return str((sampleid2date[row.name] - min_date).days)
-        else:
-            return "not applicable"
-
-    m_df["days_since_first_day"] = m_df.apply(get_days_since, axis=1)
-
+    m_df["host_age_years"] = m_df.apply(get_host_age_if_poss, axis=1)
     return m_df
 
 
@@ -81,7 +78,8 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays):
     "--input-metadata-file",
     required=True,
     help=(
-        "Input metadata filepath. Must contain a collection_timestamp column."
+        "Input metadata filepath. Must contain collection_timestamp and "
+        "host_subject_id columns."
     ),
     type=str,
 )
@@ -98,7 +96,8 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays):
     required=True,
     help=(
         "List of host birthdays, separated by commas. Each birthday should be "
-        "in YYYYMMDD format."
+        "in YYYY-MM-DD format, and the number of birthdays should match the "
+        "number of host IDs specified."
     ),
     type=str,
 )
@@ -109,7 +108,7 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays):
     help="Output metadata filepath. Will contain a host_age_years column.",
     type=str,
 )
-def add_ages(
+def add_host_ages(
     input_metadata_file, host_id_list, host_birthday_list, output_metadata_file
 ) -> None:
     """Add host age in years on to a metadata file."""
@@ -126,4 +125,4 @@ def add_ages(
 
 
 if __name__ == "__main__":
-    add_ages()
+    add_host_ages()
