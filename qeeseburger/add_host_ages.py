@@ -5,19 +5,12 @@ from qiime2 import Metadata
 from .utils import strict_parse, check_cols_present, check_cols_not_present
 
 
-def _add_extra_cols(metadata_df):
-    """Returns a DataFrame modified as expected."""
+def _add_host_ages(metadata_df, host_ids, host_birthdays):
+    """Returns a DataFrame with a host_age_years column added."""
 
     m_df = metadata_df.copy()
     check_cols_present(m_df, {"collection_timestamp"})
-    check_cols_not_present(
-        m_df,
-        {
-            "ordinal_timestamp",
-            "days_since_first_day",
-            "is_collection_timestamp_valid",
-        },
-    )
+    check_cols_not_present(m_df, {"host_age_years"})
 
     # only call strict_parse() on sample timestamps once
     sampleid2date = {}
@@ -93,36 +86,44 @@ def _add_extra_cols(metadata_df):
     type=str,
 )
 @click.option(
+    "-h",
+    "--host-id-list",
+    required=True,
+    help="List of host subject IDs, separated by commas.",
+    type=str,
+)
+@click.option(
+    "-b",
+    "--host-birthday-list",
+    required=True,
+    help=(
+        "List of host birthdays, separated by commas. Each birthday should be "
+        "in YYYYMMDD format."
+    ),
+    type=str,
+)
+@click.option(
     "-o",
     "--output-metadata-file",
     required=True,
-    help="Output metadata filepath. Will contain some additional columns.",
+    help="Output metadata filepath. Will contain a host_age_years column.",
     type=str,
 )
-def add_columns(input_metadata_file, output_metadata_file) -> None:
-    """Add some useful columns for time-series studies to a metadata file.
-
-    In particular, the columns added are "is_collection_timestamp_valid",
-    "ordinal_timestamp", and "days_since_first_day".
-
-    Note that the value of days_since_first_day may vary even between samples
-    with identical collection_timestamp values if you run this script on
-    different metadata files. This is because the "first day" is computed
-    relative to all of the valid collection_timestamps in the input metadata
-    file; to ensure that the values in this column are comparable between
-    datasets, you should merge metadata and then run this script.
-    """
+def add_ages(
+    input_metadata_file, host_id_list, host_birthday_list, output_metadata_file
+) -> None:
+    """Add host age in years on to a metadata file."""
 
     # First off, load the metadata file and convert it to a DataFrame
     m = Metadata.load(input_metadata_file)
     m_df = m.to_dataframe()
 
     # ... Actually do relevant computations
-    m_df_new = _add_extra_cols(m_df)
+    m_df_new = _add_host_ages(m_df, host_id_list, host_birthday_list)
 
     # Convert modified DataFrame back into a q2 Metadata object and save it
     Metadata(m_df_new).save(output_metadata_file)
 
 
 if __name__ == "__main__":
-    add_columns()
+    add_ages()

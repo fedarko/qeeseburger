@@ -69,3 +69,23 @@ def strict_parse(
     arrow_obj = arrow.get(timestamp, expected_formats)
     # If that didn't fail, then Arrow was able to parse the timestamp! Yay.
     return arrow_obj.date()
+
+
+def check_cols_present(df, required_cols):
+    """Checks that a collection of columns are all present in a DataFrame."""
+
+    if len(required_cols & set(df.columns)) < len(required_cols):
+        raise ValueError(
+            "Input metadata file must include the following "
+            "columns: {}".format(required_cols)
+        )
+
+
+def check_cols_not_present(df, disallowed_cols):
+    """Checks that a collection of columns are all absent from a DataFrame."""
+
+    if len(disallowed_cols & set(df.columns)) > 0:
+        raise ValueError(
+            "Input metadata file already includes at least one of the "
+            "following columns: {}".format(disallowed_cols)
+        )
