@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#PBS -V
+#PBS -N st2-fix-mcs
+#PBS -m abe
+#PBS -l pmem=16gb
+#PBS -l walltime=72:00:00
+#PBS -l nodes=1:ppn=10
+
+#    --p-shared-id-column coarse_host_id \
+source /opt/miniconda3/bin/activate qiime2-2019.7
+cd /home/mfedarko/auto-misclassification-fixing/
+qiime sourcetracker2 gibbs \
+    --i-feature-table gut-table.qza \
+    --m-sample-metadata-file smooshed-metadata-agp-and-empo3-gut.txt \
+    --p-source-category-column empo_3 \
+    --p-source-sink-column SourceSink \
+    --p-source-column-value Source \
+    --p-sink-column-value Sink \
+    --p-source-rarefaction-depth 0 \
+    --p-sink-rarefaction-depth 0 \
+    --output-dir ST2/gut \
+    --p-no-loo \
+    --verbose
+
+qiime sourcetracker2 gibbs \
+    --i-feature-table surface-table.qza \
+    --m-sample-metadata-file smooshed-metadata-agp-and-empo3-surface.txt \
+    --p-source-category-column empo_3 \
+    --p-source-sink-column SourceSink \
+    --p-source-column-value Source \
+    --p-sink-column-value Sink \
+    --p-source-rarefaction-depth 0 \
+    --p-sink-rarefaction-depth 0 \
+    --output-dir ST2/surface \
+    --p-no-loo \
+    --verbose
+
+qiime sourcetracker2 gibbs \
+    --i-feature-table secretion-table.qza \
+    --m-sample-metadata-file smooshed-metadata-agp-and-empo3-secretion.txt \
+    --p-source-category-column empo_3 \
+    --p-source-sink-column SourceSink \
+    --p-source-column-value Source \
+    --p-sink-column-value Sink \
+    --p-source-rarefaction-depth 0 \
+    --p-sink-rarefaction-depth 0 \
+    --output-dir ST2/secretion \
+    --p-no-loo \
+    --verbose
