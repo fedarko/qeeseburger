@@ -19,7 +19,7 @@ from collections import Counter
 
 host_ids = ["host1", "host2"]
 
-print('loading metadata...')
+print("loading metadata...")
 df = Metadata.load("smooshed-metadata.txt").to_dataframe()
 agp_sample_ids = set(df.loc[df.index.str.startswith("10317.")].index)
 
@@ -39,14 +39,12 @@ for e in ["Animal distal gut", "Animal secretion", "Animal surface"]:
 # runs e.g. by unique coarse host id
 
 for e in ["Animal distal gut", "Animal secretion", "Animal surface"]:
-    print('finagling stuff for {}...'.format(e))
+    print("finagling stuff for {}...".format(e))
 
     empo3subset = df[df["empo_3"] == e]
 
     empo3_sampleids = list(
-        empo3subset[
-            empo3subset["coarse_host_id"].isin(host_ids)
-        ].index
+        empo3subset[empo3subset["coarse_host_id"].isin(host_ids)].index
     )
     # Subset the metadata to only:
     # 1. the 300 prev selected AGP samples
