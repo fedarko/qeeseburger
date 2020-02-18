@@ -71,6 +71,10 @@ metadata file. You can specify multiple host IDs/birthdays in comma-separated
 lists, so this is useful for timeseries datasets where you have multiple
 subjects.
 
+Note that this doesn't change any other columns (e.g. `host_age_units`, another
+common column for Qiita metadata files). Updating that column is up to you (at least
+as of now).
+
 ### Usage
 ```
 Usage: add-host-ages [OPTIONS]
