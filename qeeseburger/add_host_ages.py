@@ -166,7 +166,11 @@ def add_host_ages(
     float_years,
     output_metadata_file,
 ) -> None:
-    """Add host age in years on to a metadata file."""
+    """Add host age in years on to a metadata file.
+
+       The column added will be named "host_age_years" if --float-years isn't
+       set, and "host_age_years_float" if --float-years *is* set.
+    """
 
     manipulate_md(
         input_metadata_file,
