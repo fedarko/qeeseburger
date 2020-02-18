@@ -78,7 +78,7 @@ Usage: add-host-ages [OPTIONS]
   Add host age in years on to a metadata file.
 
   The column added will be named "host_age_years" if --float-years isn't
-  set, and "host_age_years_float" if --float-years *is* set.
+  set, and "host_age" if --float-years *is* set.
 
 Options:
   -i, --input-metadata-file TEXT  Input metadata filepath. Must contain

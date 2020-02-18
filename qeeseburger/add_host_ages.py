@@ -20,7 +20,7 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays, float_years=False):
        "host_age_years", and will contain just the host age down to the year.
 
        If float_years is True, the new column will instead be named
-       "host_age_years_float", and will contain an APPROXIMATION of the host
+       "host_age", and will contain an APPROXIMATION of the host
        age in float years by dividing the age in days by 365.2422, and
        truncating the result to 4 decimal points.
        Note the whole APPROXIMATION thing in the previous sentence -- this is
@@ -34,13 +34,13 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays, float_years=False):
        As an example: if a host's birthday is on December 1, 1990 and
        there's a sample from November 20, 1995 from that host:
         - that sample's "host_age_years" value will be 4
-        - that sample's "host_age_years_float" value will be 4.9693
+        - that sample's "host_age" value will be 4.9693
     """
 
     m_df = metadata_df.copy()
 
     if float_years:
-        output_col_name = "host_age_years_float"
+        output_col_name = "host_age"
     else:
         output_col_name = "host_age_years"
 
@@ -169,7 +169,7 @@ def add_host_ages(
     """Add host age in years on to a metadata file.
 
        The column added will be named "host_age_years" if --float-years isn't
-       set, and "host_age_years_float" if --float-years *is* set.
+       set, and "host_age" if --float-years *is* set.
     """
 
     manipulate_md(

@@ -73,4 +73,4 @@ def test_float_years():
         index=["S1"],
     )
     new_md = _add_host_ages(md, "ABC", "1990-12-01", float_years=True)
-    assert new_md.at["S1", "host_age_years_float"] == "4.9693"
+    assert new_md.at["S1", "host_age"] == "4.9693"
