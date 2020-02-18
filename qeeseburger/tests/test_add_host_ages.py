@@ -5,6 +5,9 @@ from ..add_host_ages import _add_host_ages
 
 # TODO: test badly formatted dates in the dataset; test impossible birthdays
 # (sample date before birthday); etc.
+# TODO: test float years stuff with:
+#  -extra precision (e.g. hour/minute stuff) -- should be ignored, both if on
+#   birthday and if on sample timestamp
 
 
 def get_test_data():
@@ -62,3 +65,12 @@ def test_badly_formatted_bdays():
     with pytest.raises(ValueError) as einfo:
         _add_host_ages(data[0], data[1], "blasdfoj,lol i'm incorrect")
     assert "birthdays aren't correctly formatted." in str(einfo.value)
+
+
+def test_float_years():
+    md = pd.DataFrame(
+        {"host_subject_id": ["ABC"], "collection_timestamp": ["1995-11-20"]},
+        index=["S1"],
+    )
+    new_md = _add_host_ages(md, "ABC", "1990-12-01", float_years=True)
+    assert new_md.at["S1", "host_age_years_float"] == "4.9693"

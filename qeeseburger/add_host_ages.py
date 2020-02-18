@@ -10,14 +10,43 @@ from .utils import (
 )
 
 
-def _add_host_ages(metadata_df, host_ids, host_birthdays):
-    """Returns a DataFrame with a host_age_years column added."""
+APPROXIMATE_YEAR_LENGTH_IN_DAYS = 365.2422
+
+
+def _add_host_ages(metadata_df, host_ids, host_birthdays, float_years=False):
+    """Returns a DataFrame with a "host age" column added on.
+
+       If float_years is False, the new column will be named
+       "host_age_years", and will contain just the host age down to the year.
+
+       If float_years is True, the new column will instead be named
+       "host_age_years_float", and will contain an APPROXIMATION of the host
+       age in float years by dividing the age in days by 365.2422, and
+       truncating the result to 4 decimal points.
+       Note the whole APPROXIMATION thing in the previous sentence -- this is
+       kind of a hack, and is mostly intended for use in "comparisons". (And
+       for doing Emperor animations and stuff like that, you should really just
+       use the days_since_first_day column that add-ts-cols gives you.)
+
+       IN EITHER CASE, the values will be represented in the DataFrame as
+       strings.
+
+       As an example: if a host's birthday is on December 1, 1990 and
+       there's a sample from November 20, 1995 from that host:
+        - that sample's "host_age_years" value will be 4
+        - that sample's "host_age_years_float" value will be 4.9693
+    """
 
     m_df = metadata_df.copy()
 
+    if float_years:
+        output_col_name = "host_age_years_float"
+    else:
+        output_col_name = "host_age_years"
+
     # Validate input a bit
     check_cols_present(m_df, {"collection_timestamp", "host_subject_id"})
-    check_cols_not_present(m_df, {"host_age_years"})
+    check_cols_not_present(m_df, {output_col_name})
 
     host_id_list = [i.strip() for i in host_ids.split(",")]
     host_bday_list = [i.strip() for i in host_birthdays.split(",")]
@@ -59,20 +88,29 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays):
             # birthday...
             host_bday_date = hostid2bdaydate[sample_hostid]
             if sample_date >= host_bday_date:
-                # Success! Return the age in (integer) years expressed as
-                # a string
-                return str(relativedelta(sample_date, host_bday_date).years)
+                # Success! Return the age in (integer or float) years expressed
+                # as a string
+                if float_years:
+                    return "{:.4f}".format(
+                        (sample_date - host_bday_date).days
+                        / APPROXIMATE_YEAR_LENGTH_IN_DAYS
+                    )
+                else:
+                    return str(
+                        relativedelta(sample_date, host_bday_date).years
+                    )
             else:
-                raise ValueError(
+                print(
                     "Sample {} has a timestamp date, {}, occurring before the "
                     "host birthday date of {}.".format(
-                        row.index, sample_date, host_bday_date
+                        row.name, sample_date, host_bday_date
                     )
                 )
+                return "impossible"
         else:
             return "not applicable"
 
-    m_df["host_age_years"] = m_df.apply(get_host_age_if_poss, axis=1)
+    m_df[output_col_name] = m_df.apply(get_host_age_if_poss, axis=1)
     return m_df
 
 
@@ -106,6 +144,15 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays):
     type=str,
 )
 @click.option(
+    "--float-years",
+    is_flag=True,
+    help=(
+        "If this flag is used, the host ages will be in float approximations "
+        "(using day-level precision) instead of integers down to the year."
+    ),
+    type=str,
+)
+@click.option(
     "-o",
     "--output-metadata-file",
     required=True,
@@ -113,13 +160,17 @@ def _add_host_ages(metadata_df, host_ids, host_birthdays):
     type=str,
 )
 def add_host_ages(
-    input_metadata_file, host_id_list, host_birthday_list, output_metadata_file
+    input_metadata_file,
+    host_id_list,
+    host_birthday_list,
+    float_years,
+    output_metadata_file,
 ) -> None:
     """Add host age in years on to a metadata file."""
 
     manipulate_md(
         input_metadata_file,
-        [host_id_list, host_birthday_list],
+        [host_id_list, host_birthday_list, float_years],
         output_metadata_file,
         _add_host_ages,
     )
